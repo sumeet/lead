@@ -136,40 +136,64 @@ App::loadScreen(QScreen* screen)
 void
 App::loadSensor(QScreen* screen, QString name, int x, int y, int w, int h)
 {
+    QString sensorNameKey = screen->name() + "/" + name;
 
-    QString action = screen->name() + "/" + name + "-" + "action";
-    QString interval = screen->name() + "/" + name + "-" + "interval";
-
-    if (!settings.contains(interval))
+    if (settings.contains (sensorNameKey) == false)
     {
-        qDebug() << "App::loadSensor() interval for " << name << " not found; setting to 0";
-
-        // set default
-        settings.setValue(interval, QVariant(0));
-    }
-
-    if (!settings.contains(action))
-    {
-        qDebug() << "App::loadSensor() action for " << name << " not found; creating empty key";
-        
-        // restore missing action
-        settings.setValue(action, QString());
         return;
     }
 
-    if (settings.value(action).toString().isEmpty())
+    QString sensorName          = settings.value (sensorNameKey).toString ();
+    QString sensorEnterAction   = sensorName + "/enterAction";
+    QString sensorExitAction    = sensorName + "/exitAction";
+    QString sensorEnterDelay    = sensorName + "/enterDelay";
+    QString sensorExitDelay     = sensorName + "/exitDelay";
+    int emptyCount              = 0;
+
+    if (sensorName.isEmpty () == true)
     {
-        qDebug() << "App::loadSensor() action for " << name << " is empty";
         return;
     }
-    
 
-    // create sensor and save in list so we can delete all sensors on delete
+    if (!settings.contains (sensorEnterAction))
+    {
+        emptyCount ++;
+    }
 
-    qDebug() << "App::loadSensor() action for " << name << " is " << settings.value(action).toString();
-    qDebug() << "App::loadSensor() interval for " << name << " is " << settings.value(interval).toInt();
+    if (!settings.contains (sensorExitAction))
+    {
+        emptyCount ++;
+    }
 
-    sensors.append( new Sensor(x, y, w, h, settings.value(action).toString(), settings.value(interval).toInt()) );
+    if (emptyCount == 2)
+    {
+        // to not make this a breaking change, keep compatibility with old configurations
+        sensors.append (new Sensor (x, y, w, h, sensorName, "", 0, 0));
+        return;
+    }
+
+    if (!settings.contains (sensorEnterDelay))
+    {
+        qDebug () << "App::loadSensor () sensor " << sensorName << " does not have delay; setting to 0";
+        settings.setValue (sensorEnterDelay, QVariant (0));
+    }
+
+    if (!settings.contains (sensorExitDelay))
+    {
+        qDebug () << "App::loadSensor () sensor " << sensorName << " does not have exit delay; setting to 0";
+        settings.setValue (sensorExitDelay, QVariant (0));
+    }
+
+    qDebug () << "App::loadSensor () loaded sensor " << sensorName << " on screen " + screen->name();
+    sensors.append (
+            new Sensor (
+                x, y, w, h,
+                settings.value (sensorEnterAction).toString (),
+                settings.value (sensorExitAction).toString (),
+                settings.value (sensorEnterDelay).toInt (),
+                settings.value (sensorExitDelay).toInt ()
+            )
+    );
 }
 
 
