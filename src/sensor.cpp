@@ -69,6 +69,7 @@ Sensor::Sensor(int x, int y, int w, int h, QString enterAction, QString exitActi
     else
     {
         setAttribute(Qt::WA_TranslucentBackground, true);
+        setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
     setGeometry(x, y, w, h);
