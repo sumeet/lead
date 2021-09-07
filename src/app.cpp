@@ -33,7 +33,7 @@ SOFTWARE.
 #include <QFileSystemWatcher>
 #include <QVariant>
 
-#define SENSOR_WIDTH 5
+#define SENSOR_WIDTH 25
 #define SENSOR_HEIGHT 5
 #define DEBUG_MODE_KEY "systemsettings/debug"
 
